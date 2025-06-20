@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de Listas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Comparador de Listas</h1>
+        
+        <div class="listas-container">
+            <div class="lista">
+                <h2>Lista 1</h2>
+                <textarea id="lista1" rows="15" placeholder="Digite os itens da lista 1, um por linha"></textarea>
+            </div>
+            
+            <div class="lista">
+                <h2>Lista 2</h2>
+                <textarea id="lista2" rows="15" placeholder="Digite os itens da lista 2, um por linha"></textarea>
+            </div>
+        </div>
+        
+        <div class="botoes">
+            <button id="comparar">Comparar</button>
+            <button id="limpar1">Limpar Lista 1</button>
+            <button id="limpar2">Limpar Lista 2</button>
+            <button id="limparTudo">Limpar Tudo</button>
+        </div>
+        
+        <div class="resultados">
+            <div class="resultado">
+                <h3>Comuns</h3>
+                <div id="comuns" class="resultado-box"></div>
+            </div>
+            
+            <div class="resultado">
+                <h3>Adicionar</h3>
+                <div id="adicionar" class="resultado-box"></div>
+            </div>
+            
+            <div class="resultado">
+                <h3>Excluir</h3>
+                <div id="excluir" class="resultado-box"></div>
+            </div>
+            
+            <div class="resultado">
+                <h3>Repetidos Lista 1</h3>
+                <div id="repetidos1" class="resultado-box"></div>
+            </div>
+            
+            <div class="resultado">
+                <h3>Repetidos Lista 2</h3>
+                <div id="repetidos2" class="resultado-box"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('comparar').addEventListener('click', function() {
+            const lista1 = document.getElementById('lista1').value;
+            const lista2 = document.getElementById('lista2').value;
+            
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `lista1=${encodeURIComponent(lista1)}&lista2=${encodeURIComponent(lista2)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('comuns').innerHTML = data.comuns.join('<br>');
+                document.getElementById('adicionar').innerHTML = data.adicionar.join('<br>');
+                document.getElementById('excluir').innerHTML = data.excluir.join('<br>');
+                document.getElementById('repetidos1').innerHTML = data.repetidos_lista1.join('<br>');
+                document.getElementById('repetidos2').innerHTML = data.repetidos_lista2.join('<br>');
+            });
+        });
+        
+        document.getElementById('limpar1').addEventListener('click', function() {
+            document.getElementById('lista1').value = '';
+        });
+        
+        document.getElementById('limpar2').addEventListener('click', function() {
+            document.getElementById('lista2').value = '';
+        });
+        
+        document.getElementById('limparTudo').addEventListener('click', function() {
+            document.getElementById('lista1').value = '';
+            document.getElementById('lista2').value = '';
+            document.getElementById('comuns').innerHTML = '';
+            document.getElementById('adicionar').innerHTML = '';
+            document.getElementById('excluir').innerHTML = '';
+            document.getElementById('repetidos1').innerHTML = '';
+            document.getElementById('repetidos2').innerHTML = '';
+        });
+    </script>
+</body>
+</html>
