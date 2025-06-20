@@ -5,11 +5,11 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        # Obter dados das listas
-        lista1 = request.form.get('lista1', '').split('\n')
-        lista2 = request.form.get('lista2', '').split('\n')
+        # Obter dados das listas como arrays JSON
+        lista1 = request.json.get('lista1', [])
+        lista2 = request.json.get('lista2', [])
         
-        # Processar as listas
+        # Processar as listas (remover espaços em branco)
         lista1 = [item.strip() for item in lista1 if item.strip()]
         lista2 = [item.strip() for item in lista2 if item.strip()]
         
@@ -19,7 +19,9 @@ def index():
             'adicionar': list(set(lista1) - set(lista2)),
             'excluir': list(set(lista2) - set(lista1)),
             'repetidos_lista1': encontrar_repetidos(lista1),
-            'repetidos_lista2': encontrar_repetidos(lista2)
+            'repetidos_lista2': encontrar_repetidos(lista2),
+            'contagem_lista1': len(lista1),
+            'contagem_lista2': len(lista2)
         }
         
         return jsonify(resultados)

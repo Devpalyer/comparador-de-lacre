@@ -12,13 +12,21 @@
         
         <div class="listas-container">
             <div class="lista">
-                <h2>Lista 1</h2>
-                <textarea id="lista1" rows="15" placeholder="Digite os itens da lista 1, um por linha"></textarea>
+                <h2>Lista 1 <span id="contador1">(0/24 itens)</span></h2>
+                <div class="adicionar-item">
+                    <input type="text" id="novoItem1" placeholder="Digite um item para Lista 1">
+                    <button id="adicionar1">Adicionar</button>
+                </div>
+                <div id="itensLista1" class="itens-lista"></div>
             </div>
             
             <div class="lista">
-                <h2>Lista 2</h2>
-                <textarea id="lista2" rows="15" placeholder="Digite os itens da lista 2, um por linha"></textarea>
+                <h2>Lista 2 <span id="contador2">(0/24 itens)</span></h2>
+                <div class="adicionar-item">
+                    <input type="text" id="novoItem2" placeholder="Digite um item para Lista 2">
+                    <button id="adicionar2">Adicionar</button>
+                </div>
+                <div id="itensLista2" class="itens-lista"></div>
             </div>
         </div>
         
@@ -29,72 +37,199 @@
             <button id="limparTudo">Limpar Tudo</button>
         </div>
         
-        <div class="resultados">
-            <div class="resultado">
-                <h3>Comuns</h3>
-                <div id="comuns" class="resultado-box"></div>
+        <div class="resultados-container">
+            <div class="resultado-categoria">
+                <h3>Itens Comuns</h3>
+                <div id="comuns" class="itens-resultado"></div>
             </div>
             
-            <div class="resultado">
-                <h3>Adicionar</h3>
-                <div id="adicionar" class="resultado-box"></div>
+            <div class="resultado-categoria">
+                <h3>Itens para Adicionar (estão na Lista 1 mas não na Lista 2)</h3>
+                <div id="adicionar" class="itens-resultado"></div>
             </div>
             
-            <div class="resultado">
-                <h3>Excluir</h3>
-                <div id="excluir" class="resultado-box"></div>
+            <div class="resultado-categoria">
+                <h3>Itens para Excluir (estão na Lista 2 mas não na Lista 1)</h3>
+                <div id="excluir" class="itens-resultado"></div>
             </div>
             
-            <div class="resultado">
-                <h3>Repetidos Lista 1</h3>
-                <div id="repetidos1" class="resultado-box"></div>
+            <div class="resultado-categoria">
+                <h3>Itens Repetidos na Lista 1</h3>
+                <div id="repetidos1" class="itens-resultado"></div>
             </div>
             
-            <div class="resultado">
-                <h3>Repetidos Lista 2</h3>
-                <div id="repetidos2" class="resultado-box"></div>
+            <div class="resultado-categoria">
+                <h3>Itens Repetidos na Lista 2</h3>
+                <div id="repetidos2" class="itens-resultado"></div>
             </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('comparar').addEventListener('click', function() {
-            const lista1 = document.getElementById('lista1').value;
-            const lista2 = document.getElementById('lista2').value;
+        let lista1 = [];
+        let lista2 = [];
+        
+        function atualizarLista(lista, elemento, contador) {
+            elemento.innerHTML = '';
+            lista.forEach((item, index) => {
+                const divItem = document.createElement('div');
+                divItem.className = 'item-lista';
+                divItem.innerHTML = `
+                    <span>${item}</span>
+                    <button class="remover-item" data-index="${index}">×</button>
+                `;
+                elemento.appendChild(divItem);
+            });
+            contador.textContent = `(${lista.length}/24 itens)`;
+        }
+        
+        function criarItemResultado(texto) {
+            const div = document.createElement('div');
+            div.className = 'item-resultado';
+            div.textContent = texto;
+            return div;
+        }
+        
+        function atualizarResultados(data) {
+            const comuns = document.getElementById('comuns');
+            const adicionar = document.getElementById('adicionar');
+            const excluir = document.getElementById('excluir');
+            const repetidos1 = document.getElementById('repetidos1');
+            const repetidos2 = document.getElementById('repetidos2');
             
+            comuns.innerHTML = '';
+            adicionar.innerHTML = '';
+            excluir.innerHTML = '';
+            repetidos1.innerHTML = '';
+            repetidos2.innerHTML = '';
+            
+            if (data.comuns.length === 0) {
+                comuns.appendChild(criarItemResultado('Nenhum item comum'));
+            } else {
+                data.comuns.forEach(item => {
+                    comuns.appendChild(criarItemResultado(item));
+                });
+            }
+            
+            if (data.adicionar.length === 0) {
+                adicionar.appendChild(criarItemResultado('Nenhum item para adicionar'));
+            } else {
+                data.adicionar.forEach(item => {
+                    adicionar.appendChild(criarItemResultado(item));
+                });
+            }
+            
+            if (data.excluir.length === 0) {
+                excluir.appendChild(criarItemResultado('Nenhum item para excluir'));
+            } else {
+                data.excluir.forEach(item => {
+                    excluir.appendChild(criarItemResultado(item));
+                });
+            }
+            
+            if (data.repetidos_lista1.length === 0) {
+                repetidos1.appendChild(criarItemResultado('Nenhum item repetido'));
+            } else {
+                data.repetidos_lista1.forEach(item => {
+                    repetidos1.appendChild(criarItemResultado(item));
+                });
+            }
+            
+            if (data.repetidos_lista2.length === 0) {
+                repetidos2.appendChild(criarItemResultado('Nenhum item repetido'));
+            } else {
+                data.repetidos_lista2.forEach(item => {
+                    repetidos2.appendChild(criarItemResultado(item));
+                });
+            }
+        }
+        
+        document.getElementById('adicionar1').addEventListener('click', function() {
+            const input = document.getElementById('novoItem1');
+            const item = input.value.trim();
+            
+            if (item && lista1.length < 24) {
+                lista1.push(item);
+                atualizarLista(lista1, document.getElementById('itensLista1'), document.getElementById('contador1'));
+                input.value = '';
+            } else if (lista1.length >= 24) {
+                alert('Limite de 24 itens atingido para a Lista 1!');
+            }
+        });
+        
+        document.getElementById('adicionar2').addEventListener('click', function() {
+            const input = document.getElementById('novoItem2');
+            const item = input.value.trim();
+            
+            if (item && lista2.length < 24) {
+                lista2.push(item);
+                atualizarLista(lista2, document.getElementById('itensLista2'), document.getElementById('contador2'));
+                input.value = '';
+            } else if (lista2.length >= 24) {
+                alert('Limite de 24 itens atingido para a Lista 2!');
+            }
+        });
+        
+        document.getElementById('novoItem1').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('adicionar1').click();
+            }
+        });
+        
+        document.getElementById('novoItem2').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('adicionar2').click();
+            }
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remover-item')) {
+                const index = parseInt(e.target.getAttribute('data-index'));
+                const listaId = e.target.closest('.itens-lista').id;
+                
+                if (listaId === 'itensLista1') {
+                    lista1.splice(index, 1);
+                    atualizarLista(lista1, document.getElementById('itensLista1'), document.getElementById('contador1'));
+                } else if (listaId === 'itensLista2') {
+                    lista2.splice(index, 1);
+                    atualizarLista(lista2, document.getElementById('itensLista2'), document.getElementById('contador2'));
+                }
+            }
+        });
+        
+        document.getElementById('comparar').addEventListener('click', function() {
             fetch('/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                 },
-                body: `lista1=${encodeURIComponent(lista1)}&lista2=${encodeURIComponent(lista2)}`
+                body: JSON.stringify({
+                    lista1: lista1,
+                    lista2: lista2
+                })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('comuns').innerHTML = data.comuns.join('<br>');
-                document.getElementById('adicionar').innerHTML = data.adicionar.join('<br>');
-                document.getElementById('excluir').innerHTML = data.excluir.join('<br>');
-                document.getElementById('repetidos1').innerHTML = data.repetidos_lista1.join('<br>');
-                document.getElementById('repetidos2').innerHTML = data.repetidos_lista2.join('<br>');
+                atualizarResultados(data);
             });
         });
         
         document.getElementById('limpar1').addEventListener('click', function() {
-            document.getElementById('lista1').value = '';
+            lista1 = [];
+            atualizarLista(lista1, document.getElementById('itensLista1'), document.getElementById('contador1'));
         });
         
         document.getElementById('limpar2').addEventListener('click', function() {
-            document.getElementById('lista2').value = '';
+            lista2 = [];
+            atualizarLista(lista2, document.getElementById('itensLista2'), document.getElementById('contador2'));
         });
         
         document.getElementById('limparTudo').addEventListener('click', function() {
-            document.getElementById('lista1').value = '';
-            document.getElementById('lista2').value = '';
-            document.getElementById('comuns').innerHTML = '';
-            document.getElementById('adicionar').innerHTML = '';
-            document.getElementById('excluir').innerHTML = '';
-            document.getElementById('repetidos1').innerHTML = '';
-            document.getElementById('repetidos2').innerHTML = '';
+            lista1 = [];
+            lista2 = [];
+            atualizarLista(lista1, document.getElementById('itensLista1'), document.getElementById('contador1'));
+            atualizarLista(lista2, document.getElementById('itensLista2'), document.getElementById('contador2'));
+            document.querySelectorAll('.itens-resultado').forEach(el => el.innerHTML = '');
         });
     </script>
 </body>
